@@ -1,4 +1,5 @@
 // BUD v0.0.1 BETA by Slice
+// BUD v0.0.1 BETA by Slice
 
 #include <a_samp>
 #include <a_http>
@@ -15,9 +16,6 @@
 #define BUD_Notice(%0)       ( printf( "BUD - Notice: " %0 ) )
 #define BUD_Warning(%0)      ( printf( "BUD - Warning: " %0 ) )
 #define BUD_Error(%0)        ( printf( "BUD - Error: " %0 ) )
-#define BUD_Noticef(%0,%1)   ( printf( "BUD - Notice: " %0, %1 ) )
-#define BUD_Warningf(%0,%1)  ( printf( "BUD - Warning: " %0, %1 ) )
-#define BUD_Errorf(%0,%1)    ( printf( "BUD - Error: " %0, %1 ) )
 
  // This is so the constants can be defined before inclusion.
 
@@ -143,7 +141,7 @@ private bool:BUD::GetDB( )
 		
 		if ( g_dbKeptAlive == INVALID_DB )
 		{
-			BUD::Errorf( "Unable to open the database \"%s\".", g_szDatabaseName );
+			BUD::Error( "Unable to open the database \"%s\".", g_szDatabaseName );
 			
 			return false;
 		}
@@ -251,7 +249,7 @@ global BUD::Setting( BUD::e_OPTIONS:iSetting, _:... )
 		
 		default:
 		{
-			BUD::Warningf( "Unknown setting ID passed in BUD::Setting (%d).", _:iSetting );
+			BUD::Warning( "Unknown setting ID passed in BUD::Setting (%d).", _:iSetting );
 		}
 	}
 }
@@ -322,7 +320,7 @@ global bool:BUD::Initialize( )
 	
 	if ( !fexist( g_szDatabaseName ) )
 	{
-		BUD::Noticef( "The database \"%s\" doesn't exist; it will be created.", g_szDatabaseName );
+		BUD::Notice( "The database \"%s\" doesn't exist; it will be created.", g_szDatabaseName );
 		
 		if ( !BUD::CreateDatabase( ) )
 			return false;
@@ -378,7 +376,7 @@ private BUD::IntegrityCheck( )
 			if ( iRow == 0 && !strcmp( "ok", szField ) )
 				break;
 			else
-				BUD::Warningf( "Database integrity check says: %s", szField );
+				BUD::Warning( "Database integrity check says: %s", szField );
 			
 			iRow++;
 		}
@@ -428,7 +426,7 @@ private BUD::ReloadTableInfo( )
 		db_free_result( dbrResult );
 	}
 	else
-		BUD::Warningf( "Failed to get the table info from \"%s\"; some columns could be missing.", g_szDatabaseName );
+		BUD::Warning( "Failed to get the table info from \"%s\"; some columns could be missing.", g_szDatabaseName );
 }
 
 global BUD::VerifyColumn( const szColumnName[ ], BUD::e_COLUMN_TYPES:iType, { _,Float }:... )
@@ -473,7 +471,7 @@ recheck:
 	
 	if ( !bColumnCreated )
 	{
-		BUD::Noticef( "The column \"%s\" doesn't exist; attempting to create it.", szColumnName );
+		BUD::Notice( "The column \"%s\" doesn't exist; attempting to create it.", szColumnName );
 		
 		if ( !BUD::GetDB( ) )
 			return;
@@ -555,7 +553,7 @@ recheck:
 		goto recheck;
 	}
 	
-	BUD::Errorf( "Failed to create the column \"%s\"; this could be because of an invalid column name.", szColumnName );
+	BUD::Error( "Failed to create the column \"%s\"; this could be because of an invalid column name.", szColumnName );
 }
 
 global bool:BUD::IsNameRegistered( const szName[ ] )
@@ -878,7 +876,7 @@ global bool:BUD::MultiGet( iUID, const szTypeDefinitions[ ], { _, Float }:... )
 	
 	if ( iEntries & 0b1 )
 	{
-		BUD::Errorf( "A parameter is missing in BUD::MultiGet; expecting a variable in the end.", numargs( ) - 2 );
+		BUD::Error( "A parameter is missing in BUD::MultiGet; expecting a variable in the end.", numargs( ) - 2 );
 		
 		return false;
 	}
@@ -887,7 +885,7 @@ global bool:BUD::MultiGet( iUID, const szTypeDefinitions[ ], { _, Float }:... )
 	
 	if ( iEntries > BUD::MULTIGET_MAX_ENTRIES )
 	{
-		BUD::Errorf( "Too many entires passed to BUD::MultiGet; entires: %d, limit: " #BUD::MULTIGET_MAX_ENTRIES ".", iEntries );
+		BUD::Error( "Too many entires passed to BUD::MultiGet; entires: %d, limit: " #BUD::MULTIGET_MAX_ENTRIES ".", iEntries );
 		
 		return false;
 	}
@@ -926,7 +924,7 @@ global bool:BUD::MultiGet( iUID, const szTypeDefinitions[ ], { _, Float }:... )
 						
 						if ( iTypeLengths[ iNumTypeDefinitions ] <= 0 )
 						{
-							BUD::Errorf( "Invalid string length given in the type definitions for BUD::MultiGet: %d.", iTypeLengths[ iNumTypeDefinitions ] );
+							BUD::Error( "Invalid string length given in the type definitions for BUD::MultiGet: %d.", iTypeLengths[ iNumTypeDefinitions ] );
 							
 							return false;
 						}
@@ -939,14 +937,14 @@ global bool:BUD::MultiGet( iUID, const szTypeDefinitions[ ], { _, Float }:... )
 					}
 				}
 				
-				BUD::Errorf( "String size has to be passed in the type definitions for BUD::MultiGet; example: \"iffs[32]ii\".", iNumTypeDefinitions, iEntries );
+				BUD::Error( "String size has to be passed in the type definitions for BUD::MultiGet; example: \"iffs[32]ii\".", iNumTypeDefinitions, iEntries );
 				
 				return false;
 			}
 			
 			default:
 			{
-				BUD::Errorf( "Unknown type definition passed to BUD::MultiGet; expected: i/s/f, given: %c.", szTypeDefinitions[ i ] );
+				BUD::Error( "Unknown type definition passed to BUD::MultiGet; expected: i/s/f, given: %c.", szTypeDefinitions[ i ] );
 				
 				return false;
 			}
@@ -955,7 +953,7 @@ global bool:BUD::MultiGet( iUID, const szTypeDefinitions[ ], { _, Float }:... )
 	
 	if ( iEntries != iNumTypeDefinitions )
 	{
-		BUD::Errorf( "The number of type definitions doesn't match the number of entries passed to BUD::MultiGet; typedefs: %d, entries: %d.", iNumTypeDefinitions, iEntries );
+		BUD::Error( "The number of type definitions doesn't match the number of entries passed to BUD::MultiGet; typedefs: %d, entries: %d.", iNumTypeDefinitions, iEntries );
 		
 		return false;
 	}
@@ -1015,7 +1013,7 @@ global bool:BUD::MultiGet( iUID, const szTypeDefinitions[ ], { _, Float }:... )
 			;
 			
 			if ( iEntries != iFields )
-				BUD::Warningf( "The number of entries requested doesn't match the given number; requested: %d, given: %d", iEntries, iFields );
+				BUD::Warning( "The number of entries requested doesn't match the given number; requested: %d, given: %d", iEntries, iFields );
 			
 			for ( new iField = 0; iField < iFields; iField++ )
 			{
@@ -1051,7 +1049,7 @@ global bool:BUD::MultiGet( iUID, const szTypeDefinitions[ ], { _, Float }:... )
 		}
 		else if ( iRows > 1 )
 		{
-			BUD::Errorf( "Multiple rows fetched from one UID; UID: %d, rows: %d", iUID, iRows );
+			BUD::Error( "Multiple rows fetched from one UID; UID: %d, rows: %d", iUID, iRows );
 			
 			db_free_result( dbrResult );
 			
@@ -1074,7 +1072,7 @@ global bool:BUD::MultiSet( iUID, const szTypeDefinitions[ ], { _, Float }:... )
 	
 	if ( iEntries & 0b1 )
 	{
-		BUD::Errorf( "A parameter is missing in BUD::MultiSet; expecting a variable/value in the end.", numargs( ) - 2 );
+		BUD::Error( "A parameter is missing in BUD::MultiSet; expecting a variable/value in the end.", numargs( ) - 2 );
 		
 		return false;
 	}
@@ -1083,7 +1081,7 @@ global bool:BUD::MultiSet( iUID, const szTypeDefinitions[ ], { _, Float }:... )
 	
 	if ( iEntries > BUD::MULTISET_MAX_ENTRIES )
 	{
-		BUD::Errorf( "Too many entires passed to BUD::MultiSet; entires: %d, limit: " #BUD::MULTISET_MAX_ENTRIES ".", iEntries );
+		BUD::Error( "Too many entires passed to BUD::MultiSet; entires: %d, limit: " #BUD::MULTISET_MAX_ENTRIES ".", iEntries );
 		
 		return false;
 	}
@@ -1094,7 +1092,7 @@ global bool:BUD::MultiSet( iUID, const szTypeDefinitions[ ], { _, Float }:... )
 	
 	if ( iEntries != iNumTypeDefinitions )
 	{
-		BUD::Errorf( "The number of type definitions doesn't match the number of entries passed to BUD::MultiSet; typedefs: %d, entries: %d.", iNumTypeDefinitions, iEntries );
+		BUD::Error( "The number of type definitions doesn't match the number of entries passed to BUD::MultiSet; typedefs: %d, entries: %d.", iNumTypeDefinitions, iEntries );
 		
 		return false;
 	}
@@ -1106,7 +1104,7 @@ global bool:BUD::MultiSet( iUID, const szTypeDefinitions[ ], { _, Float }:... )
 			case 'i', 'd', 'f', 's': { }
 			default:
 			{
-				BUD::Errorf( "Unknown type definition passed to BUD::MultiSet; expected: i/s/f, given: %c.", szTypeDefinitions[ i ] );
+				BUD::Error( "Unknown type definition passed to BUD::MultiSet; expected: i/s/f, given: %c.", szTypeDefinitions[ i ] );
 				
 				return false;
 			}
@@ -1331,71 +1329,138 @@ global DBResult:BUD::RunQueryEx( const szFormat[ ], bool:bStoreResult, { _, Floa
 	if ( !BUD::GetDB( ) )
 		return BUD::NO_RESULT;
 	
+	static const
+		STATIC_ARGUMENTS = 2;
+	
 	new
-		iNumArgs = numargs( ) - 2,
-		iParams = iNumArgs * ( cellbits / 8 ),
-		szQuery[ 1024 ],
-		iPos = -1
+		     iNumArgs = numargs( ) - STATIC_ARGUMENTS,
+		     iParams = iNumArgs * ( cellbits / 8 ),
+		     szQuery[ 256 ],
+		     szNewFormat[ sizeof( szQuery ) ],
+		bool:bIsFormatCopied = false,
+		     iPos = -1,
+		     iArg = STATIC_ARGUMENTS,
+		     i,
+		bool:bSkipArguments[ 32 char ],
+		     iSkippedArguments
 	;
 	
 	goto jump_in_the_action__rambo_style;
 	
 	do
 	{
-		if ( iPos == 0 || szFormat[ iPos - 1 ] != '%' )
+		if ( iPos == 0 || ( !bIsFormatCopied && szFormat[ iPos - 1 ] != '%' ) || ( bIsFormatCopied && szNewFormat[ iPos - 1 ] != '%' )  )
 		{
-			if ( 
+			if ( ( !bIsFormatCopied && szFormat[ iPos + 1 ] == 's' ) || ( bIsFormatCopied && szNewFormat[ iPos + 1 ] == 's' ) )
+			{
+				if ( !bIsFormatCopied )
+				{
+					bIsFormatCopied = true;
+					
+					memcpy( szNewFormat, szFormat, _, ( strlen( szFormat ) + 1 ) * 4 );
+				}
+				
+				
+				i = 0;
+				
+				do
+					szQuery[ i ] = getarg( iArg, i );
+				while ( szQuery[ i++ ] );
+				
+				BUD::EscapeSqlString( szQuery );
+				
+				strdel( szNewFormat, iPos, iPos + 2 );
+				
+				--iPos;
+				
+				strins( szNewFormat, szQuery, iPos+1 );
+				
+				iPos += i - 1;
+				
+				bSkipArguments{ iArg } = true;
+				
+				++iSkippedArguments;
+			}
+			
+			++iArg;
 		}
 		
 jump_in_the_action__rambo_style:
-		iPos = strfind( szFormat, "%", .pos = iPos + 1 );
+		
+		++iPos;
+		
+		if ( bIsFormatCopied )
+			iPos = strfind( szNewFormat, "%", .pos = iPos );
+		else
+			iPos = strfind( szFormat, "%", .pos = iPos );
 	}
 	while ( iPos != -1 );
 	
-	if ( iParams )
+	if ( iParams - ( iSkippedArguments + 1 ) * ( cellbits / 8 ) )
 	{
 		new
 			iArgStart,
 			iArgEnd
 		;
 		
+		iArg = 1;
+		
 		#emit CONST.alt    bStoreResult
-        #emit LCTRL        5
-        #emit ADD
-        #emit STOR.S.pri   iArgStart
+		#emit LCTRL        5
+		#emit ADD
+		#emit STOR.S.pri   iArgStart
 		#emit LOAD.S.alt   iParams
 		#emit ADD
 		#emit STOR.S.pri   iArgEnd
 		
 		do
-        {
-            #emit LOAD.I
-            #emit PUSH.pri
+		{
+			#emit LOAD.I
+			#emit PUSH.pri
 			
-            iArgEnd -= ( cellbits / 8 );
+			if ( bSkipArguments{ iNumArgs + STATIC_ARGUMENTS - ++iArg } )
+			{
+				#emit POP.alt
+			}
 			
-            #emit LOAD.S.pri   iArgEnd
-        }
-        while ( iArgEnd > iArgStart );
+			iArgEnd -= ( cellbits / 8 );
+			
+			#emit LOAD.S.pri   iArgEnd
+		}
+		while ( iArgEnd > iArgStart );
 		
-		#emit PUSH.S     szFormat
-        #emit PUSH.C     1024
-        #emit PUSH.ADR   szQuery
+		if ( bIsFormatCopied )
+		{
+			#emit PUSH.ADR     szNewFormat
+		}
+		else
+		{
+			#emit PUSH.S       szFormat
+		}
 		
-		iParams += ( cellbits / 8 ) * 3;
+		#if ( sizeof( szQuery ) != 256 )
+			#error Update the number below this line to match the above number.
+		#endif
 		
-        #emit PUSH.S     iParams
-        #emit SYSREQ.C   format
+		#emit PUSH.C     256
+		#emit PUSH.ADR   szQuery
+		
+		iParams += ( ( cellbits / 8 ) * 3 );
+		iParams -= iSkippedArguments * ( cellbits / 8 );
+		
+		#emit PUSH.S     iParams
+		#emit SYSREQ.C   format
 		
 		iParams += ( cellbits / 8 );
+		iParams += iSkippedArguments * ( cellbits / 8 );
 		
-        #emit LCTRL        4
-        #emit LOAD.S.alt   iParams
-        #emit ADD
-        #emit SCTRL        4
-		
-		printf( szQuery );
+		#emit LCTRL        4
+		#emit LOAD.S.alt   iParams
+		#emit ADD
+		#emit SCTRL        4
 	}
+	
+	printf( szQuery );
 	
 	return BUD::NO_RESULT;
 }
@@ -1412,7 +1477,7 @@ global BUD::GetSortedData( brResults[ ][ ], const szColumnName[ ], BUD::e_SORT_O
 		return BUD::INVALID_RESULTS;
 	
 	new
-		         szQuery[ 1024 ],
+		         szQuery[ 320 ],
 		DBResult:dbrResult,
 		         iReturn = BUD::INVALID_RESULTS
 	;
@@ -1540,9 +1605,9 @@ public  BUD::HTTPResponse( iIndex, iResponseCode, szData[ ] )
 	else
 	{
 		if ( iResponseCode < 100 )
-			BUD::Noticef( "Unable to check for updates; internal error code %d.", iResponseCode );
+			BUD::Notice( "Unable to check for updates; internal error code %d.", iResponseCode );
 		else
-			BUD::Noticef( "Unable to check for updates; HTTP error code %d.", iResponseCode );
+			BUD::Notice( "Unable to check for updates; HTTP error code %d.", iResponseCode );
 	}
 }
 
@@ -1557,8 +1622,5 @@ public  BUD::HTTPResponse( iIndex, iResponseCode, szData[ ] )
 #undef BUD_Notice
 #undef BUD_Warning
 #undef BUD_Error
-#undef BUD_Noticef
-#undef BUD_Warningf
-#undef BUD_Errorf
 #undef private
 #undef global
